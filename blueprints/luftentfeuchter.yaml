@@ -27,7 +27,8 @@ blueprint:
         number:
           min: 0
           max: 100
-  mode: single
+
+mode: single
 
 variables:
   sensor: !input humidity_sensor
