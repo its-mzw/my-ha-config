@@ -1,0 +1,60 @@
+blueprint:
+  name: Luftentfeuchter Hysterese
+  description: Schaltet eine Steckdose basierend auf Luftfeuchtigkeit ein/aus
+  domain: automation
+  input:
+    humidity_sensor:
+      name: Luftfeutchitgkeissensor
+      selector:
+        entity:
+          domain: sensor
+    steckdose:
+      name: Steckdose
+      selector:
+        entity:
+          domain: switch
+    schwelle_ein:
+      name: Einschaltschwelle (%)
+      default: 65
+      selector:
+        number:
+          min: 0
+          max: 100
+    schwelle_aus:
+      name: Ausschaltschwelle (%)
+      default: 57
+      selector:
+        number:
+          min: 0
+          max: 100
+  mode: single
+
+variables:
+  sensor: !input humidity_sensor
+  ein: !input schwelle_ein
+  aus: !input schwelle_aus
+
+trigger:
+  - trigger: state
+    entity_id: !input humidity_sensor
+    for:
+      minutes: 2
+
+action:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ states(sensor) | float(default=0) > ein }}
+        sequence:
+          - action: switch.turn_on
+            target:
+              entity_id: !input steckdose
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ states(sensor) | float(default=0) < aus }}
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: !input steckdose
